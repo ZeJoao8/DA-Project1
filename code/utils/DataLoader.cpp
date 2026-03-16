@@ -32,7 +32,7 @@ void DataLoader::parseSubmission(const std::vector<std::string>& tokens) {
             std::string email = tokens[3];
             int pDomain = std::stoi(tokens[4]);
             int sDomain = std::stoi(tokens[5]);
-            submissions.emplace_back(id, title, authors, email, pDomain, sDomain);
+            submissions.push_back(Submission{id, title, authors, email, pDomain, sDomain});
         } catch (const std::exception& e) {
             std::cerr << "Error parsing Submission item: missing or invalid integer format.\n";
         }
@@ -49,7 +49,7 @@ void DataLoader::parseReviewer(const std::vector<std::string>& tokens) {
             std::string email = tokens[2];
             int pExpertise = std::stoi(tokens[3]);
             int sExpertise = std::stoi(tokens[4]);
-            reviewers.emplace_back(id, name, email, pExpertise, sExpertise);
+            reviewers.push_back(Reviewer{id, name, email, pExpertise, sExpertise});
         } catch (const std::exception& e) {
             std::cerr << "Error parsing Reviewer item: missing or invalid integer format.\n";
         }
