@@ -12,7 +12,9 @@ const int SUPER_SOURCE = -1;
 const int SUPER_SINK = -2;
 
 
-//Posso criar uma struct para distinguir o vertice de um reviewer ou de uma submission - ou posso multiplicar por 1000 um por exemplo e depois divido ao tirar - para os testes isto vai funcionar agora se eu quiser escalar e assim nao é muito bom
+map<int, int> nodeToReviewerId;
+map<int, int> nodeToSubmissionId;
+//não sei bem se fica aqui atoa fora da função ou depois criamos um classe ou assim para fazer as atribuições
 
 Graph<int> createOnlyFirstDomains(DataLoader& loader){
     //isto so vai funcionar para o generateAssignment a 0 e 1
@@ -25,18 +27,31 @@ Graph<int> createOnlyFirstDomains(DataLoader& loader){
     
     myGraph.addVertex(SUPER_SOURCE); //super source
     myGraph.addVertex(SUPER_SINK); //super sink nao sei se ha melhor forma de fazer isto
+
+    int currentNodeId = 1; // Começamos a dar IDs a partir do 1 (não sei se o 0 vai ser preciso para alguma cena tipo null)
     
     for (auto &reviewer : loader.getReviewers()){
-        myGraph.addVertex(reviewer.id);
-        myGraph.addEdge(SUPER_SOURCE,  reviewer.id, maxRev);
+        myGraph.addVertex(currentNodeId);
+        myGraph.addEdge(SUPER_SOURCE, currentNodeId, maxRev);
+
+        nodeToReviewerId[currentNodeId] = reviewer.id;
+        //guardar o id original no map para usar no output final
+
         topicReviewers[reviewer.primaryExpertise].push_back(reviewer.id);
+
+        currentNodeId++; //atualizar (usar a mesma variaval nas submissions resolve conflito de ids provisórios)
     }
     for (auto &submission : loader.getSubmissions()){
         myGraph.addVertex(submission.id);
         myGraph.addEdge(submission.id, SUPER_SINK, minRev);
-        for (auto &topicReviewer : topicReviewers[submission.primaryDomain]){
-            myGraph.addEdge(topicReviewer, submission.id, 1);
+
+        nodeToSubmissionId[currentNodeId] = submission.id;
+
+        for (auto &topicReviewerNodeId : topicReviewers[submission.primaryDomain]){
+            myGraph.addEdge(topicReviewerNodeId, currentNodeId, 1);
         }
+
+        currentNodeId++;
     }
 
     return myGraph;
