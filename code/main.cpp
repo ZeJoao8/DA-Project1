@@ -1,16 +1,58 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include "data_structures/Graph.h"
 #include "utils/DataLoader.h"
 
 using namespace std;
 
 // --- Process Placeholders ---
 
+const int SUPER_SOURCE = -1;
+const int SUPER_SINK = -2;
+
+
+//Posso criar uma struct para distinguir o vertice de um reviewer ou de uma submission - ou posso multiplicar por 1000 um por exemplo e depois divido ao tirar - para os testes isto vai funcionar agora se eu quiser escalar e assim nao é muito bom
+
+Graph<int> createOnlyFirstDomains(DataLoader& loader){
+    //isto so vai funcionar para o generateAssignment a 0 e 1
+    //para os outros a criaçao do graph é diferente
+
+    int maxRev = loader.getMaxReviewsPerReviewer();
+    int minRev = loader.getMinReviewsPerSubmission();
+    map<int, vector<int>> topicReviewers;
+    Graph<int> myGraph;
+    
+    myGraph.addVertex(SUPER_SOURCE); //super source
+    myGraph.addVertex(SUPER_SINK); //super sink nao sei se ha melhor forma de fazer isto
+    
+    for (auto &reviewer : loader.getReviewers()){
+        myGraph.addVertex(reviewer.id);
+        myGraph.addEdge(SUPER_SOURCE,  reviewer.id, maxRev);
+        topicReviewers[reviewer.primaryExpertise].push_back(reviewer.id);
+    }
+    for (auto &submission : loader.getSubmissions()){
+        myGraph.addVertex(submission.id);
+        myGraph.addEdge(submission.id, SUPER_SINK, minRev);
+        for (auto &topicReviewer : topicReviewers[submission.primaryDomain]){
+            myGraph.addEdge(topicReviewer, submission.id, 1);
+        }
+    }
+
+    return myGraph;
+}
+
+
+
 void executeReviewAssignment(DataLoader& loader) {
     // TODO: Connect to your Graph data structures and execute the Max Flow algorithms
     // to assign reviewers to submissions here.
+    Graph<int> network = createOnlyFirstDomains(loader);
+
     cout << "Executing Review Assignment...\n";
+
+
+
 }
 
 void executeRiskAnalysis(DataLoader& loader, const string& riskOutputFilename) {
