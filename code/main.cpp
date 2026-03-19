@@ -37,12 +37,14 @@ Graph<int> createOnlyFirstDomains(DataLoader& loader){
         topicReviewers[reviewers[i].primaryExpertise].push_back(i);
     }
 
-    for (int j = numReviewers; j < submissions.size(); j++){
-        myGraph.addVertex(j);
-        myGraph.addEdge(j, SUPER_SINK, minRev);
-
-        for (auto &topicReviewerNodeId : topicReviewers[submissions[j].primaryDomain]){
-            myGraph.addEdge(topicReviewerNodeId, j, 1);
+    for (int j = 0; j < submissions.size(); j++) {
+        int graphId = j + numReviewers;
+        
+        myGraph.addVertex(graphId);
+        myGraph.addEdge(graphId, SUPER_SINK, minRev);
+        
+        for (int topicReviewerGraphId : topicReviewers[submissions[j].primaryDomain]) {
+            myGraph.addEdge(topicReviewerGraphId, graphId, 1);
         }
     }
 
