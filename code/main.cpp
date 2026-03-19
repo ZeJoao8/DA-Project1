@@ -4,6 +4,7 @@
 #include "data_structures/Graph.h"
 #include "utils/DataLoader.h"
 #include "structs/Match.h"
+#include "utils/EdmondsKarp.h"
 
 using namespace std;
 
@@ -58,6 +59,10 @@ vector<Match> executeReviewAssignment(DataLoader& loader) {
     // TODO: Connect to your Graph data structures and execute the Max Flow algorithms
     // to assign reviewers to submissions here.
     Graph<int> network = createOnlyFirstDomains(loader);
+
+    vector<Match> matches;
+
+    edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK, matches);
 
 
 
