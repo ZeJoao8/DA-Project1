@@ -4,8 +4,8 @@
 #include <string>
 #include <vector>
 #include <map>
-#include "../Participants/Submission.h"
-#include "../Participants/Reviewer.h"
+#include "../structs/Submission.h"
+#include "../structs/Reviewer.h"
 
 /**
  * @brief Utility class to load configuration data from a custom CSV file.
