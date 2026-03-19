@@ -29,12 +29,22 @@ std::vector<std::string> DataLoader::split(const std::string& str, char delimite
 
 bool DataLoader::loadData(const std::string& filename) {
 
+    const std::string basePath = "datasets/input/";
+    std::string fullPath;
 
-    std::ifstream file(filename);
+    if (filename.find('/') != std::string::npos) {
+        fullPath = filename;
+    } else {
+        fullPath = basePath + filename;
+    }
+
+    std::ifstream file(fullPath);
     if (!file.is_open()) {
-        std::cerr << "Error: Could not open file " << filename << "\n";
+        std::cerr << "Error: Could not open file " << fullPath << "\n";
         return false;
     }
+
+
 
     std::string line;
     enum Section { NONE, SUBMISSIONS, REVIEWERS, PARAMETERS, CONTROL };
