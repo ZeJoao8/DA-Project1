@@ -12,46 +12,38 @@ const int SUPER_SOURCE = -1;
 const int SUPER_SINK = -2;
 
 
-map<int, int> nodeToReviewerId;
-map<int, int> nodeToSubmissionId;
-//não sei bem se fica aqui atoa fora da função ou depois criamos um classe ou assim para fazer as atribuições
-
 Graph<int> createOnlyFirstDomains(DataLoader& loader){
     //isto so vai funcionar para o generateAssignment a 0 e 1
     //para os outros a criaçao do graph é diferente
 
     int maxRev = loader.getMaxReviewsPerReviewer();
     int minRev = loader.getMinReviewsPerSubmission();
+
+    auto &reviewers = loader.getReviewers();
+    auto &submissions = loader.getSubmissions();
+    int numReviewers = reviewers.size();
+
     map<int, vector<int>> topicReviewers;
     Graph<int> myGraph;
     
     myGraph.addVertex(SUPER_SOURCE); //super source
     myGraph.addVertex(SUPER_SINK); //super sink nao sei se ha melhor forma de fazer isto
 
-    int currentNodeId = 1; // Começamos a dar IDs a partir do 1 (não sei se o 0 vai ser preciso para alguma cena tipo null)
     
-    for (auto &reviewer : loader.getReviewers()){
-        myGraph.addVertex(currentNodeId);
-        myGraph.addEdge(SUPER_SOURCE, currentNodeId, maxRev);
+    for (int i = 0; i < numReviewers; i++){
+        myGraph.addVertex(i);
+        myGraph.addEdge(SUPER_SOURCE, i, maxRev);
 
-        nodeToReviewerId[currentNodeId] = reviewer.id;
-        //guardar o id original no map para usar no output final
-
-        topicReviewers[reviewer.primaryExpertise].push_back(reviewer.id);
-
-        currentNodeId++; //atualizar (usar a mesma variaval nas submissions resolve conflito de ids provisórios)
+        topicReviewers[reviewers[i].primaryExpertise].push_back(i);
     }
-    for (auto &submission : loader.getSubmissions()){
-        myGraph.addVertex(submission.id);
-        myGraph.addEdge(submission.id, SUPER_SINK, minRev);
 
-        nodeToSubmissionId[currentNodeId] = submission.id;
+    for (int j = numReviewers; j < submissions.size(); j++){
+        myGraph.addVertex(j);
+        myGraph.addEdge(j, SUPER_SINK, minRev);
 
-        for (auto &topicReviewerNodeId : topicReviewers[submission.primaryDomain]){
-            myGraph.addEdge(topicReviewerNodeId, currentNodeId, 1);
+        for (auto &topicReviewerNodeId : topicReviewers[submissions[j].primaryDomain]){
+            myGraph.addEdge(topicReviewerNodeId, j, 1);
         }
-
-        currentNodeId++;
     }
 
     return myGraph;
