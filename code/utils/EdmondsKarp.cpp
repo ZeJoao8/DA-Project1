@@ -13,7 +13,7 @@ void testAndVisit(std::queue< Vertex<int>*> &q, Edge<int> *e, Vertex<int> *w, do
 }
 
 // Function to find an augmenting path using Breadth-First Search
-bool findAugmentingPath(Graph<int> *g, Vertex<int> *s, Vertex<int> *t, std::vector<Match>& matches) {
+bool findAugmentingPath(Graph<int> *g, Vertex<int> *s, Vertex<int> *t) {
     // Mark all vertices as not visited
     for(auto v : g->getVertexSet()) {
         v->setVisited(false);
@@ -87,7 +87,7 @@ void augmentFlowAlongPath(Vertex<int> *s, Vertex<int> *t, double f) {
 }
 
 // Main function implementing the Edmonds-Karp algorithm
-void edmondsKarp(Graph<int> *g, int source, int target, std::vector<Match>& matches) {
+int edmondsKarp(Graph<int> *g, int source, int target) {
     // Find source and target vertices in the graph
     Vertex<int>* s = g->findVertex(source);
     Vertex<int>* t = g->findVertex(target);
@@ -99,9 +99,12 @@ void edmondsKarp(Graph<int> *g, int source, int target, std::vector<Match>& matc
             e -> setFlow(0);
         }
     }
-    while (findAugmentingPath(g, s, t, matches)) {
+
+    int maxFlow = 0;
+    while (findAugmentingPath(g, s, t)) {
         double flow = findMinResidualAlongPath(s, t);
         augmentFlowAlongPath(s,t, flow);
+        maxFlow += flow;
     }
-
+    return maxFlow;
 }

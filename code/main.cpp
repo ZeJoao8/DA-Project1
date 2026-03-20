@@ -60,9 +60,7 @@ vector<Match> executeReviewAssignment(DataLoader& loader) {
     // to assign reviewers to submissions here.
     Graph<int> network = createOnlyFirstDomains(loader);
 
-    vector<Match> matches;
-
-    edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK, matches);
+    edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK);
 
 
 
