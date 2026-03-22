@@ -148,3 +148,11 @@ int DataLoader::getMaxReviewsPerReviewer() const {
     }
     return 0;
 }
+
+std::string DataLoader::getOutputFileName() const {
+    auto it = parameters.find("OutputFileName");
+    if (it != parameters.end()) {
+        return it->second;
+    }
+    return "output.csv";
+}

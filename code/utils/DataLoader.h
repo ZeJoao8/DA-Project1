@@ -58,6 +58,7 @@ public:
     // Convenience getters for common parameters expected logically
     int getMinReviewsPerSubmission() const;
     int getMaxReviewsPerReviewer() const;
+    std::string getOutputFileName() const;
 };
 
 #endif // DATALOADER_H
