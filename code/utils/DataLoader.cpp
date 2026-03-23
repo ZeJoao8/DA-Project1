@@ -29,6 +29,11 @@ std::vector<std::string> DataLoader::split(const std::string& str, char delimite
 
 bool DataLoader::loadData(const std::string& filename) {
 
+    submissions.clear();
+    reviewers.clear();
+    parameters.clear();
+    controlData.clear();
+
     const std::string basePath = "datasets/input/";
     std::string fullPath;
 
