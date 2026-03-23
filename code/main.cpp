@@ -199,6 +199,25 @@ void executeRiskAnalysis(DataLoader& loader) {
     }
 
     string outFilename = loader.getOutputFileName();
+    
+    ifstream checkFile(outFilename);
+    bool alreadyAppended = false;
+    if (checkFile.is_open()) {
+        string line;
+        while (getline(checkFile, line)) {
+            if (line.find("#Risk Analysis:") == 0) {
+                alreadyAppended = true;
+                break;
+            }
+        }
+        checkFile.close();
+    }
+
+    if (alreadyAppended) {
+        cout << "Risk analysis complete. (Results were already present in " << outFilename << ", skipping duplicate append)\n";
+        return;
+    }
+
     ofstream outFile(outFilename, ios::app);
     if (outFile.is_open()) {
         outFile << "#Risk Analysis: " << loader.getRiskAnalysis() << "\n";
