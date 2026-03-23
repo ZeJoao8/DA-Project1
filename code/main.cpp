@@ -154,10 +154,64 @@ void executeReviewAssignment(DataLoader& loader) {
     }
 }
 
-void executeRiskAnalysis(DataLoader& loader, const string& riskOutputFilename) {
-    // TODO: Implement the Risk Analysis logic. Output the results to riskOutputFilename
-    // if applicable, or process according to project requirements.
+template <class T>
+class EdgeAccessor : public Edge<T> {
+public:
+    static void setWeight(Edge<T>* edge, double w) {
+        static_cast<EdgeAccessor<T>*>(edge)->weight = w;
+    }
+};
+
+void executeRiskAnalysis(DataLoader& loader) {
+    if (loader.getRiskAnalysis() == 0) {
+        cout << "Risk analysis disabled.\n";
+        return;
+    }
+
     cout << "Executing Risk Analysis...\n";
+    Graph<int> network = createOnlyFirstDomains(loader);
+    int expectedFlow = loader.getSubmissions().size() * loader.getMinReviewsPerSubmission();
+    auto& reviewers = loader.getReviewers();
+
+    vector<int> criticalReviewers;
+    Vertex<int>* src = network.findVertex(SUPER_SOURCE);
+
+    for (size_t i = 0; i < reviewers.size(); i++) {
+        Edge<int>* targetEdge = nullptr;
+        for (Edge<int>* e : src->getAdj()) {
+            if (e->getDest()->getInfo() == (int)i) {
+                targetEdge = e;
+                break;
+            }
+        }
+
+        if (targetEdge) {
+            double originalCapacity = targetEdge->getWeight();
+            EdgeAccessor<int>::setWeight(targetEdge, 0);
+
+            double flow = edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK);
+            if (flow < expectedFlow) {
+                criticalReviewers.push_back(reviewers[i].id);
+            }
+
+            EdgeAccessor<int>::setWeight(targetEdge, originalCapacity);
+        }
+    }
+
+    string outFilename = loader.getOutputFileName();
+    ofstream outFile(outFilename, ios::app);
+    if (outFile.is_open()) {
+        outFile << "#Risk Analysis: " << loader.getRiskAnalysis() << "\n";
+        for (size_t k = 0; k < criticalReviewers.size(); k++) {
+            outFile << criticalReviewers[k];
+            if (k < criticalReviewers.size() - 1) outFile << ", ";
+        }
+        outFile << "\n";
+        outFile.close();
+        cout << "Risk analysis complete. Critical reviewers appended to " << outFilename << "\n";
+    } else {
+        cerr << "Error: Could not open " << outFilename << " for writing.\n";
+    }
 }
 
 // --- execution modes ---
@@ -217,10 +271,7 @@ void runInteractiveMode() {
                 if (!dataLoaded) {
                     cout << "Error: You must load data first (Option 1).\n";
                 } else {
-                    string file;
-                    cout << "Enter output risk file name: ";
-                    cin >> file;
-                    executeRiskAnalysis(loader, file);
+                    executeRiskAnalysis(loader);
                 }
                 break;
             case 4:
@@ -250,7 +301,7 @@ int runBatchMode(const string& inputFilename, const string& riskOutputFilename) 
 
     // Execute functions without interactive printbacks (you could suppress standard cout here)
     executeReviewAssignment(loader);
-    executeRiskAnalysis(loader, riskOutputFilename);
+    executeRiskAnalysis(loader);
 
     return 0;
 }

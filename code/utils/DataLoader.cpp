@@ -155,9 +155,23 @@ int DataLoader::getMaxReviewsPerReviewer() const {
 }
 
 std::string DataLoader::getOutputFileName() const {
-    auto it = parameters.find("OutputFileName");
-    if (it != parameters.end()) {
-        return it->second;
+    for (const auto& tokens : controlData) {
+        if (tokens.size() >= 2 && tokens[0] == "OutputFileName") {
+            std::string filename = tokens[1];
+            if (filename.size() >= 2 && filename.front() == '"' && filename.back() == '"') {
+                filename = filename.substr(1, filename.size() - 2);
+            }
+            return filename;
+        }
     }
     return "output.csv";
+}
+
+int DataLoader::getRiskAnalysis() const {
+    for (const auto& tokens : controlData) {
+        if (tokens.size() >= 2 && tokens[0] == "RiskAnalysis") {
+            try { return std::stoi(tokens[1]); } catch (...) {}
+        }
+    }
+    return 0; // Defaults to 0
 }

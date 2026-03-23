@@ -59,6 +59,7 @@ public:
     int getMinReviewsPerSubmission() const;
     int getMaxReviewsPerReviewer() const;
     std::string getOutputFileName() const;
+    int getRiskAnalysis() const;
 };
 
 #endif // DATALOADER_H
