@@ -57,7 +57,7 @@ Graph<int> createOnlyFirstDomains(DataLoader& loader){
     return myGraph;
 }
 
-void executeReviewAssignment(DataLoader& loader) {
+void executeReviewAssignment(DataLoader& loader, const string& outputFile) {
     cout << "Executing Review Assignment...\n";
     Graph<int> network = createOnlyFirstDomains(loader);
     double maxFlow = edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK);
@@ -108,7 +108,8 @@ void executeReviewAssignment(DataLoader& loader) {
         }
     }
 
-    string outFilename = loader.getOutputFileName();
+    string outFilename = outputFile.empty() ? loader.getOutputFileName() : outputFile;
+
     ofstream outFile(outFilename);
     if (outFile.is_open()) {
         sort(assignments.begin(), assignments.end(), [](const Match& a, const Match& b) {
@@ -162,7 +163,7 @@ public:
     }
 };
 
-void executeRiskAnalysis(DataLoader& loader) {
+void executeRiskAnalysis(DataLoader& loader, const string& outputFile) {
     if (loader.getRiskAnalysis() == 0) {
         cout << "Risk analysis disabled.\n";
         return;
@@ -198,7 +199,7 @@ void executeRiskAnalysis(DataLoader& loader) {
         }
     }
 
-    string outFilename = loader.getOutputFileName();
+    string outFilename = outputFile.empty() ? loader.getOutputFileName() : outputFile;
 
     ifstream checkFile(outFilename);
     bool alreadyAppended = false;

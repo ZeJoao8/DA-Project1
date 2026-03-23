@@ -24,8 +24,8 @@ int runBatchMode(const string& inputFilename, const string& riskOutputFilename) 
     }
 
     // Execute functions without interactive printbacks (you could suppress standard cout here)
-    executeReviewAssignment(loader);
-    executeRiskAnalysis(loader);
+    executeReviewAssignment(loader, riskOutputFilename);
+    executeRiskAnalysis(loader, riskOutputFilename);
 
     return 0;
 }

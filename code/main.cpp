@@ -1,8 +1,5 @@
 #include <iostream>
 #include <string>
-#include <vector>
-#include <fstream>
-#include <algorithm>
 #include "data_structures/Graph.h"
 #include "utils/DataLoader.h"
 #include "structs/Match.h"
@@ -11,7 +8,6 @@
 #include "App/BatchMode.h"
 
 using namespace std;
-
 
 int main(int argc, char* argv[]) {
     // Determine execution mode based on arguments supplied

@@ -5,8 +5,6 @@
 #ifndef APP_H
 #define APP_H
 
-#pragma once
-
 void runInteractiveMode();
 
 #endif //APP_H

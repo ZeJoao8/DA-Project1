@@ -1,11 +1,9 @@
 #include "Menu.h"
+#include "Assignments.h"
 #include "../utils/DataLoader.h"
 #include <iostream>
 
 using namespace std;
-
-void executeReviewAssignment(DataLoader& loader);
-void executeRiskAnalysis(DataLoader& loader);
 
 // --- execution modes ---
 
