@@ -3,12 +3,16 @@ project(DAProject)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(main
-        main.cpp
-        utils/DataLoader.cpp
-        algorithms/EdmondsKarp.cpp
+add_executable(myProg
+        code/main.cpp
+        code/utils/DataLoader.cpp
+        code/algorithms/EdmondsKarp.cpp
+        code/App/Assignments.cpp
+        code/App/BatchMode.cpp
+        code/App/Menu.cpp
+        code/data_structures/UFDS.cpp
 )
 
-target_include_directories(main PRIVATE
-        ${CMAKE_SOURCE_DIR}
+target_include_directories(myProg PRIVATE
+        ${CMAKE_SOURCE_DIR}/code
 )
