@@ -60,6 +60,6 @@ public:
     int getMaxReviewsPerReviewer() const;
     std::string getOutputFileName() const;
     int getRiskAnalysis() const;
+    int getGenerateAssignments() const;
 };
-
 #endif // DATALOADER_H
