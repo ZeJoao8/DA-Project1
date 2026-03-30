@@ -1,14 +1,14 @@
 # Doxyfile Configuration
 PROJECT_NAME           = "Scientific Conference Organization Tool"
-OUTPUT_DIRECTORY       = documentation/
-INPUT                  = code/
+OUTPUT_DIRECTORY       = documentation
+INPUT                  = code
 RECURSIVE              = YES
 EXTRACT_ALL            = YES
 EXTRACT_PRIVATE        = YES
 GENERATE_LATEX         = NO
 GENERATE_HTML          = YES
 HTML_OUTPUT            = html
-# Treat complexity as a custom tag
+# Treat complexity as a custom tag (optional)
 ALIASES                += "complexity=@par Complexity:"
 # Include diagrams if possible (requires dot, but standard setup is fine)
 HAVE_DOT               = NO
