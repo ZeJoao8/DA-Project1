@@ -1,18 +1,20 @@
 #ifndef MATCH_H
 #define MATCH_H
 
-#include <string>
+/**
+ * @file Match.h
+ * @brief Defines the Match structure for review assignments.
+ */
 
 /**
- * @brief Represents a match.
- * 
- * This class stores the details of a match including the reviewer ID, 
- * the submission ID and matched Domain.
+ * @brief Represents a successful assignment between a reviewer and a submission.
+ * * This structure stores the details of a match, including the reviewer ID, 
+ * the submission ID, and the specific domain that linked them together.
  */
 struct Match {
-    int revId;                  
-    int subId;
-    int match;
+    int revId; ///< ID of the assigned reviewer
+    int subId; ///< ID of the assigned submission
+    int match; ///< The domain ID that validated this match (e.g., primary or secondary domain)
 };
 
-#endif 
+#endif // MATCH_H

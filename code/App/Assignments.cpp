@@ -1,8 +1,5 @@
 #include "Assignments.h"
 #include "../algorithms/EdmondsKarp.h"
-#include "../data_structures/Graph.h"
-#include "../structs/Match.h"
-#include "../structs/Missing.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -115,7 +112,7 @@ vector<Match> extractAssignments(Graph<int> &network, DataLoader &loader,
   return assignments;
 }
 
-vector<Missing> findMissingReviews(Graph<int> &network, DataLoader &loader,
+std::vector<Missing> findMissingReviews(Graph<int> &network, DataLoader &loader,
                                    double maxFlow, int expectedFlow) {
   auto &reviewers = loader.getReviewers();
   auto &submissions = loader.getSubmissions();

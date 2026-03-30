@@ -93,4 +93,20 @@ void executeReviewAssignment(DataLoader& loader, const std::string& outputFile =
  */
 void executeRiskAnalysis(DataLoader& loader, const std::string& outputFile = "");
 
+/**
+ * @brief Identifies submissions that failed to reach the required minimum number of reviews.
+ *
+ * Checks the edges connecting submissions to the super sink. If the flow is strictly
+ * less than the capacity (weight), the submission lacks the necessary reviewers.
+ *
+ * @param network      The flow network after executing the Edmonds-Karp algorithm.
+ * @param loader       The DataLoader object containing original entity data.
+ * @param maxFlow      The total maximum flow achieved in the network.
+ * @param expectedFlow The ideal total flow (Number of Submissions * Min Reviews).
+ * @return             A vector of Missing structures representing submissions lacking reviews.
+ *
+ * @note Time complexity: O(S + E), where S is the number of submissions and E the number of edges.
+ */
+std::vector<Missing> findMissingReviews(Graph<int> &network, DataLoader &loader, double maxFlow, int expectedFlow);
+
 #endif // ASSIGNMENTS_H
