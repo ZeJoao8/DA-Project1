@@ -86,6 +86,7 @@ public:
   void setSelected(bool selected);
   void setReverse(Edge<T> *reverse);
   void setFlow(double flow);
+  void setWeight(double weight);
 
 protected:
   Vertex<T> *dest; // destination vertex
@@ -296,6 +297,10 @@ template <class T> void Edge<T>::setReverse(Edge<T> *reverse) {
 }
 
 template <class T> void Edge<T>::setFlow(double flow) { this->flow = flow; }
+
+template <class T> void Edge<T>::setWeight(double weight) {
+  this->weight = weight;
+}
 
 /********************** Graph  ****************************/
 

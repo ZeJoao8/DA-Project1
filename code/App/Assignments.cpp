@@ -25,7 +25,6 @@ struct Missing {
   int missingCount;
 };
 
-
 Graph<int> createGraphGeneral(DataLoader &loader, int mode) {
   int maxRev = loader.getMaxReviewsPerReviewer();
   int minRev = loader.getMinReviewsPerSubmission();
@@ -84,15 +83,17 @@ Graph<int> createGraphGeneral(DataLoader &loader, int mode) {
   return myGraph;
 }
 
-vector<Match> extractAssignments(Graph<int> &network, DataLoader &loader, int mode) {
-  auto &reviewers   = loader.getReviewers();
+vector<Match> extractAssignments(Graph<int> &network, DataLoader &loader,
+                                 int mode) {
+  auto &reviewers = loader.getReviewers();
   auto &submissions = loader.getSubmissions();
 
   vector<Match> assignments;
 
   for (size_t i = 0; i < reviewers.size(); i++) {
     Vertex<int> *v = network.findVertex(i);
-    if (v == nullptr) continue;
+    if (v == nullptr)
+      continue;
 
     for (Edge<int> *e : v->getAdj()) {
       int destInfo = e->getDest()->getInfo();
@@ -102,9 +103,9 @@ vector<Match> extractAssignments(Graph<int> &network, DataLoader &loader, int mo
           int subIndex = destInfo - reviewers.size();
 
           int subPrim = submissions[subIndex].primaryDomain;
-          int subSec  = submissions[subIndex].secondaryDomain;
+          int subSec = submissions[subIndex].secondaryDomain;
           int revPrim = reviewers[i].primaryExpertise;
-          int revSec  = reviewers[i].secondaryExpertise;
+          int revSec = reviewers[i].secondaryExpertise;
 
           int matchDomain = -1;
           if (revPrim == subPrim) {
@@ -117,7 +118,8 @@ vector<Match> extractAssignments(Graph<int> &network, DataLoader &loader, int mo
             matchDomain = subSec;
           }
 
-          assignments.push_back({reviewers[i].id, submissions[subIndex].id, matchDomain});
+          assignments.push_back(
+              {reviewers[i].id, submissions[subIndex].id, matchDomain});
         }
       }
     }
@@ -126,10 +128,9 @@ vector<Match> extractAssignments(Graph<int> &network, DataLoader &loader, int mo
   return assignments;
 }
 
-
 vector<Missing> findMissingReviews(Graph<int> &network, DataLoader &loader,
                                    double maxFlow, int expectedFlow) {
-  auto &reviewers   = loader.getReviewers();
+  auto &reviewers = loader.getReviewers();
   auto &submissions = loader.getSubmissions();
 
   vector<Missing> missingReviews;
@@ -137,7 +138,8 @@ vector<Missing> findMissingReviews(Graph<int> &network, DataLoader &loader,
   if (maxFlow < expectedFlow) {
     for (size_t j = 0; j < submissions.size(); j++) {
       Vertex<int> *v = network.findVertex(reviewers.size() + j);
-      if (v == nullptr) continue;
+      if (v == nullptr)
+        continue;
 
       for (Edge<int> *e : v->getAdj()) {
         if (e->getDest()->getInfo() == SUPER_SINK) {
@@ -154,9 +156,7 @@ vector<Missing> findMissingReviews(Graph<int> &network, DataLoader &loader,
   return missingReviews;
 }
 
-
-void writeOutput(const string &filename,
-                 vector<Match> assignments,
+void writeOutput(const string &filename, vector<Match> assignments,
                  const vector<Missing> &missingReviews) {
   ofstream outFile(filename);
   if (!outFile.is_open()) {
@@ -166,24 +166,28 @@ void writeOutput(const string &filename,
 
   sort(assignments.begin(), assignments.end(),
        [](const Match &a, const Match &b) {
-         if (a.subId != b.subId) return a.subId < b.subId;
+         if (a.subId != b.subId)
+           return a.subId < b.subId;
          return a.revId < b.revId;
        });
 
   outFile << "#SubmissionId,ReviewerId,Match\n";
   for (const auto &match : assignments) {
-    outFile << match.subId << ", " << match.revId << ", " << match.match << "\n";
+    outFile << match.subId << ", " << match.revId << ", " << match.match
+            << "\n";
   }
 
   sort(assignments.begin(), assignments.end(),
        [](const Match &a, const Match &b) {
-         if (a.revId != b.revId) return a.revId < b.revId;
+         if (a.revId != b.revId)
+           return a.revId < b.revId;
          return a.subId < b.subId;
        });
 
   outFile << "#ReviewerId,SubmissionId,Match\n";
   for (const auto &match : assignments) {
-    outFile << match.revId << ", " << match.subId << ", " << match.match << "\n";
+    outFile << match.revId << ", " << match.subId << ", " << match.match
+            << "\n";
   }
 
   outFile << "#Total: " << assignments.size() << "\n";
@@ -202,40 +206,35 @@ void writeOutput(const string &filename,
   outFile.close();
 }
 
-
 void executeReviewAssignment(DataLoader &loader, const string &outputFile) {
   int mode = loader.getGenerateAssignments();
+  if (mode == 0)
+    return;
 
   Graph<int> network = createGraphGeneral(loader, mode);
   double maxFlow = edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK);
 
-  if (mode == 0) return;
-
   cout << "Executing Review Assignment (Mode " << mode << ")...\n";
 
   auto &submissions = loader.getSubmissions();
-  int expectedFlow  = submissions.size() * loader.getMinReviewsPerSubmission();
+  int expectedFlow = submissions.size() * loader.getMinReviewsPerSubmission();
 
-  vector<Match>   assignments    = extractAssignments(network, loader, mode);
-  vector<Missing> missingReviews = findMissingReviews(network, loader, maxFlow, expectedFlow);
+  vector<Match> assignments = extractAssignments(network, loader, mode);
+  vector<Missing> missingReviews =
+      findMissingReviews(network, loader, maxFlow, expectedFlow);
 
-  string outFilename = outputFile.empty() ? loader.getOutputFileName() : outputFile;
+  string outFilename =
+      outputFile.empty() ? loader.getOutputFileName() : outputFile;
   writeOutput(outFilename, assignments, missingReviews);
   cout << "Output saved to " << outFilename << "\n";
 
   if (maxFlow < expectedFlow) {
     cout << "\n--- Assignment Process Failed ---\n";
-    cout << "Max Flow (" << maxFlow << ") is less than Expected Flow (" << expectedFlow << ").\n";
+    cout << "Max Flow (" << maxFlow << ") is less than Expected Flow ("
+         << expectedFlow << ").\n";
     cout << "Failure details written to " << outFilename << ".\n";
   }
 }
-
-template <class T> class EdgeAccessor : public Edge<T> {
-public:
-  static void setWeight(Edge<T> *edge, double w) {
-    static_cast<EdgeAccessor<T> *>(edge)->weight = w;
-  }
-};
 
 void executeRiskAnalysis(DataLoader &loader, const string &outputFile) {
   if (loader.getRiskAnalysis() == 0) {
@@ -265,14 +264,14 @@ void executeRiskAnalysis(DataLoader &loader, const string &outputFile) {
 
     if (targetEdge) {
       double originalCapacity = targetEdge->getWeight();
-      EdgeAccessor<int>::setWeight(targetEdge, 0);
+      targetEdge->setWeight(0);
 
       double flow = edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK);
       if (flow < expectedFlow) {
         criticalReviewers.push_back(reviewers[i].id);
       }
 
-      EdgeAccessor<int>::setWeight(targetEdge, originalCapacity);
+      targetEdge->setWeight(originalCapacity);
     }
   }
 
