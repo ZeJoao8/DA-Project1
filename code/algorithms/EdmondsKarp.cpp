@@ -56,25 +56,24 @@ bool findAugmentingPath(Graph<int> *g, Vertex<int> *s, Vertex<int> *t) {
 // Function to find the minimum residual capacity along the augmenting path
 double findMinResidualAlongPath(Vertex<int> *s, Vertex<int> *t) {
   double f = INF;
-  Vertex<int> *v = t; // Começar no T!
+  Vertex<int> *v = t; // It must start in t otherwise an error will occur
 
   while (v != s) {
     Edge<int> *e = v->getPath();
 
-    // Se o destino da aresta for o nó atual, viemos na direção normal (Forward)
+    // If dest of the current edge is our current node -> (Forward)
     if (e->getDest() == v) {
       double res_cap = e->getWeight() - e->getFlow();
       if (res_cap < f)
         f = res_cap;
-      v = e->getOrig(); // Recuar para a origem da aresta
+      v = e->getOrig(); // Back to the origin
     }
-    // Se a origem da aresta for o nó atual, viemos "em contramão" (Backward)
+    // (Backward)
     else {
       double res_cap = e->getFlow();
       if (res_cap < f)
         f = res_cap;
-      v = e->getDest(); // Recuar para o destino da aresta (que na verdade foi
-                        // de onde viemos)
+      v = e->getDest(); // Back to the dest of the edge
     }
   }
   return f;

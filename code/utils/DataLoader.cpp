@@ -4,17 +4,17 @@
 #include <iostream>
 #include <sstream>
 
-// remover espaços e,tabs e \r\n do início e fim de uma string
+// Removes leading and trailing whitespace, tabs and newline characters
 std::string DataLoader::trim(const std::string &str) const {
   size_t first = str.find_first_not_of(" \t\r\n");
   if (std::string::npos == first) {
-    return "";
+    return ""; // String is entirely whitespace
   }
   size_t last = str.find_last_not_of(" \t\r\n");
   return str.substr(first, (last - first + 1));
 }
 
-// parte uma string por vírgulas e aplica trim a cada campo.
+// Splits a string by the given delimiter and trims each resulting token
 std::vector<std::string> DataLoader::split(const std::string &str,
                                            char delimiter) const {
   std::vector<std::string> tokens;
@@ -27,12 +27,13 @@ std::vector<std::string> DataLoader::split(const std::string &str,
 }
 
 bool DataLoader::loadData(const std::string &filename) {
-
+  // Clear any previously loaded data before parsing a new file
   submissions.clear();
   reviewers.clear();
   parameters.clear();
   controlData.clear();
 
+  // If no path separator is found, assume the file is in the default input directory
   const std::string basePath = "../datasets/input/";
   std::string fullPath;
 
@@ -57,6 +58,8 @@ bool DataLoader::loadData(const std::string &filename) {
     if (trimmedLine.empty())
       continue;
 
+    // Lines starting with '#' are either section headers or comments — skip data parsing
+    // Section headers update the current parsing context
     if (trimmedLine[0] == '#') {
       if (trimmedLine == "#Submissions")
         currentSection = SUBMISSIONS;
@@ -66,11 +69,13 @@ bool DataLoader::loadData(const std::string &filename) {
         currentSection = PARAMETERS;
       else if (trimmedLine == "#Control")
         currentSection = CONTROL;
+      // All other # lines (column headers, separators, comments) are ignored
       continue;
     }
 
     std::vector<std::string> tokens = split(trimmedLine, ',');
 
+    // Dispatch to the appropriate parser based on which section we are in
     switch (currentSection) {
     case SUBMISSIONS:
       parseSubmission(tokens);
@@ -92,7 +97,8 @@ bool DataLoader::loadData(const std::string &filename) {
   file.close();
   return true;
 }
-// recebe o vector de tokens e constrói um Submission
+
+// Parses a submission line: Id, Title, Authors, Email, Primary, [Secondary]
 void DataLoader::parseSubmission(const std::vector<std::string> &tokens) {
   if (tokens.size() < 5) {
     std::cerr << "Error parsing Submission: not enough fields.\n";
@@ -100,32 +106,34 @@ void DataLoader::parseSubmission(const std::vector<std::string> &tokens) {
   }
   try {
     int id = std::stoi(tokens[0]);
-    std::string title = tokens[1];
+    std::string title   = tokens[1];
     std::string authors = tokens[2];
-    std::string email = tokens[3];
+    std::string email   = tokens[3];
     int pDomain = std::stoi(tokens[4]);
-    int sDomain = -1;
+    int sDomain = -1; // Secondary domain is optional; -1 means not set
     if (tokens.size() > 5 && !tokens[5].empty())
       sDomain = std::stoi(tokens[5]);
-    submissions.push_back(
-        Submission{id, title, authors, email, pDomain, sDomain});
+    submissions.push_back(Submission{id, title, authors, email, pDomain, sDomain});
   } catch (const std::exception &e) {
     std::cerr << "Error parsing Submission: " << e.what() << "\n";
   }
 }
 
+// Stores a key-value parameter (e.g. "MinReviewsPerSubmission, 3")
 void DataLoader::parseParameter(const std::vector<std::string> &tokens) {
   if (tokens.size() >= 2) {
     parameters[tokens[0]] = tokens[1];
   }
 }
 
+// Stores a control line as a vector of tokens for later lookup
 void DataLoader::parseControl(const std::vector<std::string> &tokens) {
   if (!tokens.empty()) {
     controlData.push_back(tokens);
   }
 }
 
+// Parses a reviewer line: Id, Name, Email, Primary, [Secondary]
 void DataLoader::parseReviewer(const std::vector<std::string> &tokens) {
   if (tokens.size() < 4) {
     std::cerr << "Error parsing Reviewer: not enough fields.\n";
@@ -133,10 +141,10 @@ void DataLoader::parseReviewer(const std::vector<std::string> &tokens) {
   }
   try {
     int id = std::stoi(tokens[0]);
-    std::string name = tokens[1];
+    std::string name  = tokens[1];
     std::string email = tokens[2];
     int pExpertise = std::stoi(tokens[3]);
-    int sExpertise = -1;
+    int sExpertise = -1; // Secondary expertise is optional; -1 means not set
     if (tokens.size() > 4 && !tokens[4].empty())
       sExpertise = std::stoi(tokens[4]);
     reviewers.push_back(Reviewer{id, name, email, pExpertise, sExpertise});
@@ -148,14 +156,16 @@ void DataLoader::parseReviewer(const std::vector<std::string> &tokens) {
 const std::vector<Submission> &DataLoader::getSubmissions() const {
   return submissions;
 }
+
 const std::vector<Reviewer> &DataLoader::getReviewers() const {
   return reviewers;
 }
+
 const std::map<std::string, std::string> &DataLoader::getParameters() const {
   return parameters;
 }
-const std::vector<std::vector<std::string>> &
-DataLoader::getControlData() const {
+
+const std::vector<std::vector<std::string>> &DataLoader::getControlData() const {
   return controlData;
 }
 
@@ -167,7 +177,7 @@ int DataLoader::getMinReviewsPerSubmission() const {
     } catch (...) {
     }
   }
-  return 0;
+  return 0; // Default if parameter is missing or invalid
 }
 
 int DataLoader::getMaxReviewsPerReviewer() const {
@@ -178,13 +188,14 @@ int DataLoader::getMaxReviewsPerReviewer() const {
     } catch (...) {
     }
   }
-  return 0;
+  return 0; // Default if parameter is missing or invalid
 }
 
 std::string DataLoader::getOutputFileName() const {
   for (const auto &tokens : controlData) {
     if (tokens.size() >= 2 && tokens[0] == "OutputFileName") {
       std::string filename = tokens[1];
+      // Strip surrounding quotes if present (e.g. "output.csv" -> output.csv)
       if (filename.size() >= 2 && filename.front() == '"' &&
           filename.back() == '"') {
         filename = filename.substr(1, filename.size() - 2);
@@ -192,7 +203,7 @@ std::string DataLoader::getOutputFileName() const {
       return filename;
     }
   }
-  return "output.csv";
+  return "output.csv"; // Default output filename
 }
 
 int DataLoader::getRiskAnalysis() const {
@@ -204,7 +215,7 @@ int DataLoader::getRiskAnalysis() const {
       }
     }
   }
-  return 0; // Defaults to 0
+  return 0; // Default: no risk analysis
 }
 
 int DataLoader::getGenerateAssignments() const {
@@ -216,5 +227,5 @@ int DataLoader::getGenerateAssignments() const {
       }
     }
   }
-  return 0; // Return 0 to indicate it was not found
+  return 0; // Default: run but do not report
 }
