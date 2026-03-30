@@ -1,16 +1,11 @@
-//
-// Created by user on 23/03/2026.
-//
-
 #include "Assignments.h"
 #include "../algorithms/EdmondsKarp.h"
 #include "../data_structures/Graph.h"
 #include "../structs/Match.h"
+#include "../structs/Missing.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <set>
 
 using namespace std;
 
@@ -18,12 +13,6 @@ using namespace std;
 
 const int SUPER_SOURCE = -1;
 const int SUPER_SINK = -2;
-
-struct Missing {
-  int subId;
-  int domain;
-  int missingCount;
-};
 
 Graph<int> createGraphGeneral(DataLoader &loader, int mode) {
   int maxRev = loader.getMaxReviewsPerReviewer();
@@ -37,13 +26,11 @@ Graph<int> createGraphGeneral(DataLoader &loader, int mode) {
   myGraph.addVertex(SUPER_SOURCE);
   myGraph.addVertex(SUPER_SINK);
 
-  // source → reviewers
   for (int i = 0; i < numReviewers; i++) {
     myGraph.addVertex(i);
     addFlowEdge(myGraph, SUPER_SOURCE, i, maxRev);
   }
 
-  // submissions
   for (int j = 0; j < submissions.size(); j++) {
     int subId = j + numReviewers;
 
@@ -207,12 +194,13 @@ void writeOutput(const string &filename, vector<Match> assignments,
 }
 
 void executeReviewAssignment(DataLoader &loader, const string &outputFile) {
-  int mode = loader.getGenerateAssignments();
-  if (mode == 0)
-    return;
 
+  int mode = loader.getGenerateAssignments();
   Graph<int> network = createGraphGeneral(loader, mode);
   double maxFlow = edmondsKarp(&network, SUPER_SOURCE, SUPER_SINK);
+
+  if (mode == 0)
+    return;
 
   cout << "Executing Review Assignment (Mode " << mode << ")...\n";
 
@@ -226,13 +214,15 @@ void executeReviewAssignment(DataLoader &loader, const string &outputFile) {
   string outFilename =
       outputFile.empty() ? loader.getOutputFileName() : outputFile;
   writeOutput(outFilename, assignments, missingReviews);
-  cout << "Output saved to " << outFilename << "\n";
 
   if (maxFlow < expectedFlow) {
     cout << "\n--- Assignment Process Failed ---\n";
     cout << "Max Flow (" << maxFlow << ") is less than Expected Flow ("
          << expectedFlow << ").\n";
     cout << "Failure details written to " << outFilename << ".\n";
+  } else {
+    cout << "\n--- Assignment Process Completed Successfully ---\n";
+    cout << "Output saved to " << outFilename << "\n";
   }
 }
 
